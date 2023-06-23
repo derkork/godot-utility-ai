@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3 uid="uid://cuv24hxba30cb"]
+
+[ext_resource type="Script" path="res://addons/godot_utility_ai/debugging/influence_map_debugger/influence_map_debugger_2d.gd" id="1_66222"]
+[ext_resource type="Shader" path="res://addons/godot_utility_ai/debugging/influence_map_debugger/influence_map_debugger_2d.gdshader" id="2_1hbr6"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_emkov"]
+shader = ExtResource("2_1hbr6")
+shader_parameter/sources = null
+shader_parameter/source_count = null
+shader_parameter/base_color = null
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_u8ht8"]
+
+[node name="InfluenceMapDebugger2D" type="MeshInstance2D"]
+material = SubResource("ShaderMaterial_emkov")
+texture = SubResource("PlaceholderTexture2D_u8ht8")
+script = ExtResource("1_66222")
