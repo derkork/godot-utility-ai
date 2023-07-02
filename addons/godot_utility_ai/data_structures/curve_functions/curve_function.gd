@@ -14,6 +14,7 @@ enum CurveFunctionType {
 }
 
 var _function:Callable = _undefined
+var _derivative:Callable = _undefined
 
 ## The type of the function.
 @export var type:CurveFunctionType = CurveFunctionType.LINEAR:
@@ -52,17 +53,27 @@ func _refresh():
 	match type:
 		CurveFunctionType.LINEAR:
 			_function = _linear
+			_derivative = _linear_derivative
 		CurveFunctionType.LOGICSTICS:
 			_function = _logistic
+			_derivative = _logistic_derivative
 		CurveFunctionType.POLYNOMIAL:
 			_function = _polynomial
+			_derivative = _polynomial_derivative
+			
 
 	curve_changed.emit()
 		
-## Returns a value at the given input index.
+## Returns a value at the given input index. The returned value is clamped between 0 and 1.
 func sample(input:float) -> float:
 	var x = clamp(input, 0.0, 1.0)
 	return clamp(_function.call(x), 0.0, 1.0)
+
+## Returns the value of the derivative of this function at the given input index. The derivative
+## is not clamped.
+func sample_derivative(input:float) -> float:
+	var x = clamp(input, 0.0, 1.0)
+	return _derivative.call(x)
 
 ## A function that is used when nothing is initialized yet. Returns 0 for all inputs.
 func _undefined(x:float) -> float:
@@ -72,10 +83,23 @@ func _undefined(x:float) -> float:
 func _linear(x:float) -> float:
 	return rise * (x - midpoint) + offset
 
+## The derivative of a linear function.
+func _linear_derivative(x:float) -> float:
+	return rise
+
 ## A logistic function.	
 func _logistic(x:float) -> float:
 	return rise * (1 /(1 + exp(-exponent * (x - midpoint)))) + offset
 
+## The derivative of a logistic function.
+func _logistic_derivative(x:float) -> float:
+	var y =  exp(-exponent * (x-midpoint))
+	return y * exponent * rise / ((1 + y) ** 2)
+
 ## A polynomial function.
 func _polynomial(x:float) -> float:
 	return rise * ((x - midpoint) ** exponent) + offset
+
+## The derivative of a polynomial function.
+func _polynomial_derivative(x:float) -> float:
+	return exponent * rise * ((x - midpoint) ** (exponent - 1))

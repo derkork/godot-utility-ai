@@ -10,7 +10,10 @@ var _size:int
 
 ## Clears the tree and fills it with the given entries.
 func fill(entries:Array[KDTreeEntry2D]):
-	_root = _fill(entries, 0)
+	# since we sort the array, we need to create a copy as to not 
+	# modify the array we got. the user will not expect his array to be 
+	# magically reordered.
+	_root = _fill(entries.duplicate(), 0)
 	_size = entries.size()
 
 

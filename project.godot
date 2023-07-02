@@ -21,7 +21,7 @@ project/assembly_name="godot-utility-ai"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_utility_ai/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot_utility_ai/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
 
 [input]
 
