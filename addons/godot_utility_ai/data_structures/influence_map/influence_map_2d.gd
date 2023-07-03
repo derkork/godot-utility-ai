@@ -10,9 +10,14 @@ signal refreshed
 ## provide less accurate data at lower CPU cost.
 @export var refresh_interval:float = 0.5
 
-## Only influence sources that are in the given groups will be added to this
-## influence map. If this is empty the influence map will not 
-@export var source_groups:Array[String] = [] 
+## Influence sources that are in the given groups will be added to this
+## influence map. If this is empty, the influence map will be zero everywhere.
+@export var additive_source_groups:Array[String] = [] 
+
+## Influence sources that are in the given groups will be subtracted from
+## this influence map. If an influence source is in both the additive and 
+## subtractive groups, it will be ignored.
+@export var subtractive_source_groups:Array[String] = []
 
 
 ## The KDTree holding the influence sources.
@@ -31,22 +36,42 @@ func _ready():
 func _refresh():
 	# we use a dictionary here to avoid duplicates
 	var entries = {}
+	var ignored = {}
 	_max_source_range = 0
 	
-	# find all unique influence sources in the given groups
-	for group in source_groups:
+	# find all unique influence sources in the given additive groups
+	for group in additive_source_groups:
 		var nodes = get_tree().get_nodes_in_group(group)
 		for node in nodes:
 			if node is InfluenceSource2D and not node.ignore:
-				entries[node] = node
+				entries[node] = true
 				_max_source_range = max(_max_source_range, node.max_range)
 				
+	# repeat for all subtractive groups
+	for group in subtractive_source_groups:
+		var nodes = get_tree().get_nodes_in_group(group)
+		for node in nodes:
+			if node is InfluenceSource2D and not node.ignore:
+				if entries.get(node) == true:
+					push_warning("Influence source ", node.get_path(), " is both in additive and subtractive source groups. It will be ignored.")
+					# we keep an extra list here because the node could be in another subtractive group
+					# as well which would re-add it if we deleted it from the entries list just yet
+					ignored[node] = true
+				else:
+					entries[node] = false
+					_max_source_range = max(_max_source_range, node.max_range)
+				
+	# remove all ignored nodes from the entries list
+	for node in ignored.keys():
+		entries.erase(node)
+	
 				
 	# create tree entries and add them to the tree
 	var tree_entries:Array[KDTreeEntry2D] = []
 	for entry in entries.keys():
 		var tree_entry := KDTreeEntry2D.new(entry.global_position)
 		tree_entry.data["source"] = entry
+		tree_entry.data["additive"] = entries[entry]
 		tree_entries.append(tree_entry)
 		
 	_tree.fill(tree_entries)
@@ -59,27 +84,9 @@ func _refresh():
 	refreshed.emit()
 		
 
-## Gets a normalized influence value (0 to 1) at the given position taking into
-## account influence sources within the given radius.
-func get_influence_at(position:Vector2, max_radius:float = 100) -> float:
-	
-	# first determine the search radius and get all influence sources within
-	# that radius that are potentially relevant
-	var total_radius = max_radius + _max_source_range
-	var entries = _tree.find(position, total_radius)
-	
-	# Then sum up the influence of all sources near the given position
-	var total := 0.0
-	for entry in entries:
-		var source = entry.data["source"]
-		var influence = source.get_influence_at(position)
-		total += influence
-		
-	# and normalize it
-	return clamp(total, 0.0, 1.0)
 
 ## Calculates the gradient of the influence map at the given position using the given set of influence sources.
-func _get_influence_gradient_at(position:Vector2, entries:Array[InfluenceSource2D]) -> Vector2:
+func _get_influence_gradient_at(position:Vector2, entries:Dictionary) -> Vector2:
 
 	# We calculate the gradient by calculating the derivative of the influence function
 	# at the given position. We need to calculate the derivative of the sum of all influence
@@ -88,32 +95,29 @@ func _get_influence_gradient_at(position:Vector2, entries:Array[InfluenceSource2
 	# gradient of the influence function at the given position.
 
 	var total_gradient = Vector2.ZERO
-	for entry in entries:
+	for entry in entries.keys():
+		var additive = entries[entry]
 		var gradient = entry.get_influence_gradient_at(position)
-		total_gradient += gradient
-
+		if additive:
+			total_gradient += gradient
+		else:
+			total_gradient -= gradient
+			
 	return total_gradient
 
 ## Calculates the influence at the given position using the given set of influence sources.
-func _get_influence_at(position:Vector2, entries:Array[InfluenceSource2D]) -> float:
+func _get_influence_at(position:Vector2, entries:Dictionary) -> float:
 	var total := 0.0
-	for entry in entries:
+	for entry in entries.keys():
+		var additive = entries[entry]
 		var influence = entry.get_influence_at(position)
-		total += influence
-		
+		if additive:
+			total += influence
+		else:
+			total -= influence
+			
 	return clamp(total, 0.0, 1.0)
 
-
-## Returns the position of the maximum influence within the given radius of the given position. Note that this
-## is a heuristic and not guaranteed to return the actual maximum influence position. You can tune the accuracy
-## and speed of this function using the step_limit and scale parameters. The step_limit determines how many
-## steps are taken to find the maximum influence position. The scale determines the size of the steps. 
-## Increasing the amount of steps may increase the accuracy of the result but also increases the computation time.
-## The step size is in world unit and determines the size of the steps. Bigger step sizes can help to avoid 
-## finding a local maximum instead of the global maximum but they can also cause the function to miss the maximum
-## entirely. So you may need to experiment with these parameters to find the right balance between accuracy and speed.
-func get_influence_maximum_around(position:Vector2, radius:float, step_limit:int = 5, scale:float = 100, points = null) -> Vector2:
-	return _get_influence_extremum(position, radius, step_limit, scale, true, points)
 
 
 ## Returns the position of minimum or maximum influence within the given radius of the given position.
@@ -142,7 +146,7 @@ func _get_influence_extremum(position:Vector2, radius:float, step_limit:int, sca
 		if idx >= sources.size() or idx > step_limit:
 			# no more sources to try, give up
 			return position
-		search_point =  position + (sources[idx].global_position - position).normalized() * radius
+		search_point =  position + (sources.keys()[idx].global_position - position).normalized() * radius
 		gradient = _get_influence_gradient_at(search_point, sources).normalized()
 		extremum = _get_influence_at(search_point, sources)
 		idx += 1
@@ -194,18 +198,48 @@ func _get_influence_extremum(position:Vector2, radius:float, step_limit:int, sca
 	return search_point
 
 
+## Gets a normalized influence value (0 to 1) at the given position taking into
+## account influence sources within the given radius.
+func get_influence_at(position:Vector2, max_radius:float = 100) -> float:
+	
+	# first determine the search radius and get all influence sources within
+	# that radius that are potentially relevant
+	return _get_influence_at(position, find_relevant_sources(position, max_radius))
+
+## Returns the position of the maximum influence within the given radius of the given position. Note that this
+## is a heuristic and not guaranteed to return the actual maximum influence position. You can tune the accuracy
+## and speed of this function using the step_limit and scale parameters. The step_limit determines how many
+## steps are taken to find the maximum influence position. The scale determines the size of the steps. 
+## Increasing the amount of steps may increase the accuracy of the result but also increases the computation time.
+## The step size is in world unit and determines the size of the steps. Bigger step sizes can help to avoid 
+## finding a local maximum instead of the global maximum but they can also cause the function to miss the maximum
+## entirely. So you may need to experiment with these parameters to find the right balance between accuracy and speed.
+func get_influence_maximum_around(position:Vector2, radius:float, step_limit:int = 5, scale:float = 100, points = null) -> Vector2:
+	return _get_influence_extremum(position, radius, step_limit, scale, true, points)
+
+
 ## Finds all influence sources that are potentially relevant to the given position within the given radius.
-func find_relevant_sources(position:Vector2, max_radius:float = 100) -> Array[InfluenceSource2D]:
+## The key is the influence source, the value is a boolean where true means the source is additive
+## and false means the source is subtractive. If a limit is given will only report the closest
+## sources up to the given limit. A limit <= 0 means "unlimited".
+func find_relevant_sources(position:Vector2, max_radius:float = 100, limit:int = 0) -> Dictionary:
 	
 	# first determine the search radius and get all influence sources within
 	# that radius that are potentially relevant
 	var total_radius = max_radius + _max_source_range
 	var entries = _tree.find(position, total_radius)
 	
-	# Then build an array
-	var sources:Array[InfluenceSource2D] = []
+	# Then build the result dictionary
+	var sources = {}
 	for entry in entries:
-		var source = entry.data["source"]
-		sources.append(source)
+		sources[entry.data["source"]] = entry.data["additive"]
+	
+	# Is there a size limit and are we over it?
+	if limit > 0 and sources.size() > limit:
+		# sort such that the furthest away are now first in the array
+		entries.sort_custom(func(a,b): a.data["source"].global_position.distance_squared_to(position) > b.data["source"].global_position.distance_squared_to(position))
+		var to_remove = entries.slice(0, sources.size() - limit)
+		for entry in to_remove:
+			sources.erase[entry]
 		
 	return sources

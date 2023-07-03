@@ -1,7 +1,7 @@
 extends Node2D
 
 @onready var label:Label = %Label
-@onready var enemy_influence:InfluenceMap2D = %EnemyInfluence
+@onready var enemy_influence:InfluenceMap2D = %Threat
 
 
 var pos = Vector2(0, 0)

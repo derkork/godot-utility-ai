@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://bcob20vywjl5h"]
+
+[ext_resource type="Texture2D" uid="uid://b45dtuh7nqqvx" path="res://icon.svg" id="1_vjn5u"]
+[ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/influence_map/influence_source_2d.gd" id="2_t5tlj"]
+[ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/curve_functions/curve_function.gd" id="3_80h05"]
+
+[sub_resource type="GDScript" id="GDScript_sm0nr"]
+script/source = "extends Node2D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	$Label.text = str(global_position)
+
+
+"
+
+[sub_resource type="Resource" id="Resource_vqvhs"]
+script = ExtResource("3_80h05")
+type = 1
+rise = -1.0
+offset = 1.0
+exponent = 2.0
+midpoint = 0.0
+
+[node name="friend" type="Node2D"]
+script = SubResource("GDScript_sm0nr")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("1_vjn5u")
+
+[node name="InfluenceSource2D" type="Node2D" parent="." groups=["friend"]]
+script = ExtResource("2_t5tlj")
+max_range = 300.0
+falloff = SubResource("Resource_vqvhs")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -50.0
+offset_right = 40.0
+offset_bottom = 23.0

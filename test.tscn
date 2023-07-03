@@ -1,27 +1,26 @@
-[gd_scene load_steps=5 format=3 uid="uid://by5x2ler1qdr"]
+[gd_scene load_steps=6 format=3 uid="uid://by5x2ler1qdr"]
 
 [ext_resource type="Script" path="res://test.gd" id="1_70o42"]
 [ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/influence_map/influence_map_2d.gd" id="1_jcue5"]
 [ext_resource type="PackedScene" uid="uid://dx5i5pkm0djii" path="res://enemy.tscn" id="2_dr0jd"]
 [ext_resource type="PackedScene" uid="uid://cuv24hxba30cb" path="res://addons/godot_utility_ai/debugging/influence_map_debugger/influence_map_debugger_2d.tscn" id="4_gt5py"]
+[ext_resource type="PackedScene" uid="uid://bcob20vywjl5h" path="res://friend.tscn" id="5_ak01l"]
 
 [node name="Test" type="Node2D"]
 z_index = 2
 script = ExtResource("1_70o42")
 
-[node name="EnemyInfluence" type="Node" parent="."]
+[node name="Threat" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("1_jcue5")
-source_groups = Array[String](["enemy"])
+additive_source_groups = Array[String](["enemy"])
+subtractive_source_groups = Array[String](["friend"])
 
 [node name="enemy" parent="." instance=ExtResource("2_dr0jd")]
-position = Vector2(510, 128)
+position = Vector2(782, 283)
 
 [node name="enemy2" parent="." instance=ExtResource("2_dr0jd")]
-position = Vector2(346, 502)
-
-[node name="enemy3" parent="." instance=ExtResource("2_dr0jd")]
-position = Vector2(752, 345)
+position = Vector2(352, 406)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(574, 317)
@@ -29,7 +28,7 @@ ignore_rotation = false
 
 [node name="InfluenceMapDebugger2D" parent="." instance=ExtResource("4_gt5py")]
 z_index = -2
-map = NodePath("../EnemyInfluence")
+map = NodePath("../Threat")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -40,5 +39,8 @@ offset_top = 19.0
 offset_right = 109.0
 offset_bottom = 45.0
 text = "Influence:"
+
+[node name="friend" parent="." instance=ExtResource("5_ak01l")]
+position = Vector2(433, 192)
 
 [editable path="InfluenceMapDebugger2D"]

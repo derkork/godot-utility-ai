@@ -75,37 +75,35 @@ func _process(delta):
 	mesh.surface_add_vertex_2d(viewport_bottom_right)
 	mesh.surface_add_vertex_2d(viewport_top_left)
 
-	# now the second triange reuses bottom_right and top_left, so we just need to add bottom_left
+	# now the second triangle reuses bottom_right and top_left, so we just need to add bottom_left
 	mesh.surface_add_vertex_2d(viewport_bottom_left)
 
 	mesh.surface_end()
 
 
 func _on_map_refreshed():
-	var relevant_sources = _map.find_relevant_sources(_screen_center, _screen_outcircle_radius)
 	
 	# we support up to 10 sources, if we have more just pick the 10 closest
-	if relevant_sources.size() > 10:
-		relevant_sources.sort_custom(func(a,b): a.global_position.distance_to(_screen_center) < b.global_position.distance_to(_screen_center))
-
-		relevant_sources = relevant_sources.slice(0, 10)
-
+	var relevant_sources = _map.find_relevant_sources(_screen_center, _screen_outcircle_radius, 10)
+	
 	# we now build an array of information for the shader to draw
 	# for each source we have:
-	# - position.x
-	# - position.y
-	# - radius
-	# - falloff-type (0 = polynomial, 1 = logicstics, 2 = linear)
-	# - rise
-	# - offset
-	# - exponent
-	# - midpoint
+	# - 0 - position.x
+	# - 1 - position.y
+	# - 2 - radius
+	# - 3 - multiplier (1 for additive, -1 for subtractive) 
+	# - 4 - falloff-type (0 = polynomial, 1 = logicstics, 2 = linear)
+	# - 5 - rise
+	# - 6 - offset
+	# - 7 - exponent
+	# - 8 - midpoint
 
 	var data:Array[float] = []
-	for source in relevant_sources:
+	for source in relevant_sources.keys():
 		data.append(source.global_position.x)
 		data.append(source.global_position.y)
 		data.append(source.max_range)
+		data.append(1.0 if relevant_sources[source] else -1.0)
 		data.append(float(source.falloff.type))
 		data.append(source.falloff.rise)
 		data.append(source.falloff.offset)
@@ -114,5 +112,6 @@ func _on_map_refreshed():
 
 	material.set_shader_parameter("sources", data)
 	material.set_shader_parameter("source_count", relevant_sources.size())
-
+	print(data)
+	
 

@@ -1,7 +1,8 @@
 shader_type canvas_item;
 
-// an array of a maxium of 10 influence sources
-uniform float[80] sources;
+// an array of a maxium of 10 influence sources, each being described
+// by 9 floats.
+uniform float[90] sources;
 // the current amount of influence sources
 uniform int source_count;
 // the color we use for drawing influence
@@ -18,7 +19,7 @@ float polynomial_contribution(float x, float rise, float offset, float exponent,
 }
 
 float logistics_contribution(float x, float rise, float offset, float exponent, float midpoint) {
-	return rise * (1. /(1. + pow(E, -exponent * (x - midpoint)))) + offset;
+	return rise * (1. /(1. + exp(-exponent * (x - midpoint)))) + offset;
 }
 
 void vertex() {
@@ -38,10 +39,11 @@ void fragment() {
 		// calculate the influence at this place
 		for(int i = 0; i < source_count; i++) {
 			// extract data from the array
-			int source_offset = i * 8;
+			int source_offset = i * 9;
 			float pos_x = sources[source_offset];
 			float pos_y = sources[source_offset + 1];
 			float max_range = sources[source_offset + 2];
+			float multiplier = sources[source_offset + 3];
 			
 			// check how far we are from the current source
 			float distance_to_source = distance(vec2(pos_x, pos_y), world_pos.xy);
@@ -54,11 +56,11 @@ void fragment() {
 			
 			// now calculate the actual contribution
 			// get the data for the falloff function
-			int type = int(sources[source_offset + 3]);
-			float rise = sources[source_offset + 4];
-			float offset = sources[source_offset + 5];
-			float exponent = sources[source_offset + 6];
-			float midpoint = sources[source_offset + 7];
+			int type = int(sources[source_offset + 4]);
+			float rise = sources[source_offset + 5];
+			float offset = sources[source_offset + 6];
+			float exponent = sources[source_offset + 7];
+			float midpoint = sources[source_offset + 8];
 		
 			float contribution = 0.;
 			switch(type) {
@@ -70,12 +72,13 @@ void fragment() {
 					break;
 				case 2: // logistics	
 					contribution = logistics_contribution(percentage, rise, offset, exponent, midpoint);
+					break;
 				default:
 					contribution = 1.;
 					break;
 			}	
 			
-			total += clamp(contribution, 0., 1.);
+			total += multiplier * clamp(contribution, 0., 1.);
 		}
 		
 		// clamp between 0 and 1.
