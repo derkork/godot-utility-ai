@@ -7,7 +7,7 @@ func before_test():
 
 
 
-func test_something():
+func test_insert_retrieve():
 	# SETUP
 	# we create an insert a few nodes
 	var nodes:Array[KDTreeEntry2D] = [

@@ -1,6 +1,7 @@
 @tool	
 ## A curve modeling function. Such functions are defined in a range of 0 to 1 and return
-## values between 0 and 1.
+## values between 0 and 1. Similar to Godot's Curve but is based on a formula rather than individual
+## curve points.
 class_name CurveFunction
 extends Resource
 
