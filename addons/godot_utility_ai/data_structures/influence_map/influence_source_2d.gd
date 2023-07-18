@@ -12,6 +12,7 @@ extends Node2D
 
 ## If set to true, all influence maps will ignore this influence source.
 @export var ignore:bool = false
+		
 
 
 ## Calculates the influence that this source has at the given position normalized to a value 
@@ -55,3 +56,4 @@ func get_influence_gradient_at(target_position:Vector2) -> Vector2:
 		offset.x * static_part,
 		offset.y * static_part
 	)
+

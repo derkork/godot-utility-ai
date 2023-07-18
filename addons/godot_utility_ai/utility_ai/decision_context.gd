@@ -67,7 +67,7 @@ func pick_winner_or_null() -> Activity:
 	#   there is not much to gain by using a more complex algorithm (e.g.
 	#   the alias method).
 	# - this code relies on the fact that dictionaries in godot return
-	#   their keys in insertion order.
+	#   their keys in repeatable, predictable order.
 	var total_weight:float = 0.0
 	for activity in _highest_stratum.keys():
 		total_weight += _highest_stratum[activity]

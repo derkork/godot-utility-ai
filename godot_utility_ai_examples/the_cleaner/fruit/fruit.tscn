@@ -1,0 +1,160 @@
+[gd_scene load_steps=24 format=3 uid="uid://cirx7fq70h51p"]
+
+[ext_resource type="Texture2D" uid="uid://8n6cxwm31job" path="res://godot_utility_ai_examples/the_cleaner/fruit/pineapple.png" id="1_4e76v"]
+[ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/influence_map/influence_source_2d.gd" id="2_mnuhh"]
+[ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/curve_functions/curve_function.gd" id="3_ow15h"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x8sk2"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o0pid"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nl4gn"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ck2in"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ehxl"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7iboc"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4pxta"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tb2dh"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_def0r"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vsygu"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s1c5g"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(320, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2shvx"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(352, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0wd0v"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(384, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dvlb1"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(416, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ttow3"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(448, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s2nxi"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(480, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bfg82"]
+atlas = ExtResource("1_4e76v")
+region = Rect2(512, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lnrfv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x8sk2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o0pid")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nl4gn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ck2in")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ehxl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7iboc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4pxta")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tb2dh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_def0r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vsygu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s1c5g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2shvx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0wd0v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dvlb1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ttow3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s2nxi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bfg82")
+}],
+"loop": true,
+"name": &"default",
+"speed": 20.0
+}]
+
+[sub_resource type="Resource" id="Resource_ly2ao"]
+script = ExtResource("3_ow15h")
+type = 0
+rise = -1.0
+offset = 0.0
+exponent = 1.0
+midpoint = 1.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_iso5w"]
+
+[node name="fruit" type="Node2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -16)
+sprite_frames = SubResource("SpriteFrames_lnrfv")
+frame_progress = 0.726366
+
+[node name="InfluenceSource2D" type="Node2D" parent="." groups=["fruit"]]
+script = ExtResource("2_mnuhh")
+max_range = 200.0
+falloff = SubResource("Resource_ly2ao")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, -15)
+shape = SubResource("CapsuleShape2D_iso5w")

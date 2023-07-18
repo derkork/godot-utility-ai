@@ -46,13 +46,9 @@ func test_highest_probability_wins_most_often():
 	# THEN:
 	# one of the activities has won every time
 	assert_int(activity1_won + activity2_won).is_equal(total_tries)
-	# activity2 has won more often than activity1
-	assert_int(activity2_won).is_greater(activity1_won)
 	# activity1 has won in roughly 30% of the cases (+/- 10%)
 	assert_float(float(activity1_won) / float(total_tries)).is_equal_approx(0.3, 0.1)
 	# activity2 has won in roughly 70% of the cases (+/- 10%)
 	assert_float(float(activity2_won) / float(total_tries)).is_equal_approx(0.7, 0.1)
 	
-	
-			
 			

@@ -14,3 +14,7 @@ func _parse_begin(object):
 	var preview = preload("curve_function_preview.gd").new()
 	preview.curve_function = object
 	add_custom_control(preview)
+	
+	var presets = preload("curve_function_presets.gd").new()
+	presets.curve_function = object
+	add_custom_control(presets)

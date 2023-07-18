@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="BlackboardExpression" load_steps=2 format=3 uid="uid://d17pwbt6qpgnl"]
+
+[ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/expressions/blackboard_expression.gd" id="1_xweqh"]
+
+[resource]
+script = ExtResource("1_xweqh")
+key = &"FruitInfluenceMap"
+global_blackboard = true

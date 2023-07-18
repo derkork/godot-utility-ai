@@ -11,7 +11,7 @@ signal curve_changed
 enum CurveFunctionType {
 	LINEAR = 0,
 	POLYNOMIAL = 1,
-	LOGICSTICS = 2,
+	LOGISTICS = 2,
 }
 
 var _function:Callable = _undefined
@@ -55,7 +55,7 @@ func _refresh():
 		CurveFunctionType.LINEAR:
 			_function = _linear
 			_derivative = _linear_derivative
-		CurveFunctionType.LOGICSTICS:
+		CurveFunctionType.LOGISTICS:
 			_function = _logistic
 			_derivative = _logistic_derivative
 		CurveFunctionType.POLYNOMIAL:

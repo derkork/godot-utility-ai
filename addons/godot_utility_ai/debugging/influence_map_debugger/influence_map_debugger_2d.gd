@@ -1,7 +1,7 @@
 extends MeshInstance2D
 
 ## Path to the map to debug. Will search for children until it finds an InfluenceMap2D
-@export var map:NodePath
+@export_node_path("InfluenceSource2D") var map:NodePath
 
 ## The color to draw the map in.
 @export var color:Color = Color.CORNFLOWER_BLUE
@@ -47,6 +47,9 @@ func _find_map(node:Node):
 	return null
 
 func _process(delta):
+	if not visible:
+		return
+		
 	# this rect needs to always be the size of the viewport and it needs to
 	# move with any camera2d or other magic that might be going on
 
@@ -82,6 +85,8 @@ func _process(delta):
 
 
 func _on_map_refreshed():
+	if not visible:
+		return
 	
 	# we support up to 10 sources, if we have more just pick the 10 closest
 	var relevant_sources = _map.find_relevant_sources(_screen_center, _screen_outcircle_radius, 10)
@@ -92,7 +97,7 @@ func _on_map_refreshed():
 	# - 1 - position.y
 	# - 2 - radius
 	# - 3 - multiplier (1 for additive, -1 for subtractive) 
-	# - 4 - falloff-type (0 = polynomial, 1 = logicstics, 2 = linear)
+	# - 4 - falloff-type (0 = polynomial, 1 = logistics, 2 = linear)
 	# - 5 - rise
 	# - 6 - offset
 	# - 7 - exponent
@@ -112,6 +117,5 @@ func _on_map_refreshed():
 
 	material.set_shader_parameter("sources", data)
 	material.set_shader_parameter("source_count", relevant_sources.size())
-	print(data)
 	
 

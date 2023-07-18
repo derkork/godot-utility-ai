@@ -19,6 +19,10 @@ signal refreshed
 ## subtractive groups, it will be ignored.
 @export var subtractive_source_groups:Array[String] = []
 
+## Whether this influence map should automatically store itself
+## in the global blackboard. The node name is used as a key.
+@export var store_in_blackboard:bool = true
+
 
 ## The KDTree holding the influence sources.
 var _tree:KDTree2D = KDTree2D.new()
