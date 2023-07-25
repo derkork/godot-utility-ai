@@ -142,6 +142,7 @@ midpoint = 1.0
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_iso5w"]
 
 [node name="fruit" type="Node2D"]
+z_index = 6
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -16)

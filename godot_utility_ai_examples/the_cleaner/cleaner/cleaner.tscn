@@ -1,10 +1,11 @@
-[gd_scene load_steps=16 format=3 uid="uid://bdwm8cnwy7jgk"]
+[gd_scene load_steps=18 format=3 uid="uid://bdwm8cnwy7jgk"]
 
 [ext_resource type="SpriteFrames" uid="uid://bswd8dutt3vj6" path="res://godot_utility_ai_examples/the_cleaner/cleaner/sprite_frames.tres" id="1_i8yjy"]
 [ext_resource type="Script" path="res://godot_utility_ai_examples/the_cleaner/cleaner/cleaner.gd" id="1_qp7r0"]
 [ext_resource type="Script" path="res://addons/godot_utility_ai/utility_ai/decider.gd" id="2_g6tns"]
 [ext_resource type="Script" path="res://addons/godot_utility_ai/utility_ai/activity.gd" id="4_pyli8"]
 [ext_resource type="Script" path="res://addons/godot_utility_ai/utility_ai/considerations/influence_map_location_picker_2d.gd" id="5_xl165"]
+[ext_resource type="Script" path="res://addons/godot_utility_ai/utility_ai/considerations/blackboard_key_exists_consideration.gd" id="8_6twxg"]
 [ext_resource type="Resource" uid="uid://d17pwbt6qpgnl" path="res://godot_utility_ai_examples/the_cleaner/blackboard_expressions/fruit_influence_map.tres" id="9_gfyp5"]
 [ext_resource type="Script" path="res://addons/godot_utility_ai/data_structures/expressions/custom_expression.gd" id="10_jsyf1"]
 
@@ -120,13 +121,19 @@ script = ExtResource("10_jsyf1")
 expression = "self.visibility_radius"
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2ov2d"]
+radius = 6.0
+height = 20.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2i6gd"]
 radius = 15.0
 height = 60.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_8tbhx"]
+radius = 8.0
+
 [node name="Cleaner" type="CharacterBody2D"]
 script = ExtResource("1_qp7r0")
+visibility_radius = 500.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
@@ -145,24 +152,57 @@ libraries = {
 script = ExtResource("2_g6tns")
 owning_entity = NodePath("..")
 
-[node name="Move in area with many fruits" type="Node" parent="Decider"]
+[node name="Find a suitable area to move to" type="Node" parent="Decider"]
 script = ExtResource("4_pyli8")
 
-[node name="Find area with many fruits" type="Node" parent="Decider/Move in area with many fruits"]
+[node name="Already have a target? Skip!" type="Node" parent="Decider/Find a suitable area to move to"]
+script = ExtResource("8_6twxg")
+key = &"destination"
+weight_when_present = 0.0
+weight_when_absent = 1.0
+
+[node name="Find area with many fruits" type="Node" parent="Decider/Find a suitable area to move to"]
 script = ExtResource("5_xl165")
 influence_map = ExtResource("9_gfyp5")
 radius = SubResource("Resource_rubln")
-blackboard_key = &"fruit_spot"
+blackboard_key = &"destination"
+minimum_rank = 2
+
+[node name="Keep Walking" type="Node" parent="Decider"]
+script = ExtResource("4_pyli8")
+
+[node name="Do I have a target?" type="Node" parent="Decider/Keep Walking"]
+script = ExtResource("8_6twxg")
+key = &"destination"
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_postprocessing = 1
+debug_enabled = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -15)
+position = Vector2(0, -10)
 shape = SubResource("CapsuleShape2D_2ov2d")
+debug_color = Color(0.45098, 0.0901961, 0.133333, 0.792157)
 
 [node name="CollectionRange" type="Area2D" parent="."]
+visible = false
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollectionRange"]
 position = Vector2(0, -15)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_2i6gd")
+
+[node name="TerrainDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TerrainDetector"]
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_8tbhx")
+
+[connection signal="activity_physics_process" from="Decider/Find a suitable area to move to" to="." method="_walk_towards_target"]
+[connection signal="activity_physics_process" from="Decider/Keep Walking" to="." method="_walk_towards_target"]
+[connection signal="body_shape_entered" from="TerrainDetector" to="." method="_on_terrain_detector_body_shape_entered"]
+[connection signal="body_shape_exited" from="TerrainDetector" to="." method="_on_terrain_detector_body_shape_exited"]
