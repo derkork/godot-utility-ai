@@ -1,4 +1,3 @@
-@tool
 class_name InfluenceMap2D
 extends Node
 
@@ -32,9 +31,13 @@ var _tree:KDTree2D = KDTree2D.new()
 var _max_source_range:float = 0
 
 func _ready():
-	# don't do anything in the editor
-	if not Engine.is_editor_hint():
-		_refresh()
+	if Engine.is_editor_hint():	
+		return
+
+	_refresh()
+		
+	if store_in_blackboard:
+		Blackboard.store(name, self)
 	
 ## Refreshes the influence map. New sources will be detected, old sources will be discarded.
 func _refresh():
@@ -120,7 +123,7 @@ func _get_influence_at(position:Vector2, entries:Dictionary) -> float:
 		else:
 			total -= influence
 			
-	return clamp(total, 0.0, 1.0)
+	return total
 
 
 
