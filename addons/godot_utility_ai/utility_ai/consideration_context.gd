@@ -10,6 +10,8 @@ var _scored_considerations:int = 0
 ## The activity which this consideration context works with.
 var _activity:Activity = null
 
+var _pick_actions:Array[Callable] = []
+
 func _init(activity:Activity):
 	_activity = activity
 	
@@ -21,14 +23,17 @@ var will_not_be_taken:bool:
 	get: return _current_multiplier <= 0
 
 ## Records the result of a consideration.
-func record_consideration_result(min_rank:int, multiplier:float):
+func record_consideration_result(min_rank:int, multiplier:float, when_picked:Callable = Callable()):
 	_scored_considerations += 1
 	_current_rank = max(_current_rank, min_rank)
 	_current_multiplier *= multiplier
 	
+	if not when_picked.is_null():
+		_pick_actions.append(when_picked)
+	
 ## Applies the results of this context to the given decision context and 
 ## resets this context so it can be reused.	
-func apply_results_to(decision_context:DecisionContext):
+func apply_results_to(decision_context:DecisionContext) -> Array[Callable]:
 	# TODO: provide a compensation factor for when we have a lot of considerations
 	# as these will pull down the multiplier.	
 	decision_context.record_decision_result(_activity, _current_rank, _current_multiplier)
@@ -36,3 +41,6 @@ func apply_results_to(decision_context:DecisionContext):
 	_current_rank = DecisionContext.INITIAL_MIN_RANK
 	_current_multiplier = 1.0
 	_scored_considerations = 0
+	var result = _pick_actions
+	_pick_actions = []
+	return result

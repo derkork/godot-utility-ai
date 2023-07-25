@@ -7,3 +7,4 @@ extends Node
 
 func consider(entity:Node, context:ConsiderationContext):
 	push_warning("The Consideration base class does not do anything, please use a subtype.")
+
