@@ -6,12 +6,19 @@ extends MeshInstance2D
 ## The color to draw the map in.
 @export var color:Color = Color.CORNFLOWER_BLUE
 
+@export_node_path("Node2D") var point_of_view:NodePath
+
+@export var point_of_view_radius:float = 100
+
 ## The rect onto which we draw the shader
 @onready var _rect:MeshInstance2D = self
 
 
 ## The map we debug
 var _map:InfluenceMap2D = null
+
+## The node which we use as point of view
+var _pov:Node2D = null
 
 ## The current screen center in world space
 var _screen_center:Vector2
@@ -30,6 +37,8 @@ func _ready():
 
 	mesh = ImmediateMesh.new()
 	material.set_shader_parameter("base_color", color)
+	
+	_pov = get_node_or_null(point_of_view)
 
 
 func _find_map(node:Node):
@@ -82,6 +91,14 @@ func _process(delta):
 	mesh.surface_add_vertex_2d(viewport_bottom_left)
 
 	mesh.surface_end()
+	
+	if is_instance_valid(_pov):
+		material.set_shader_parameter("point_of_view", _pov.global_position)
+		material.set_shader_parameter("point_of_view_radius", point_of_view_radius)
+		material.set_shader_parameter("use_point_of_view", true)
+	else:
+		material.set_shader_parameter("use_point_of_view", false)	
+
 
 
 func _on_map_refreshed():
@@ -117,5 +134,6 @@ func _on_map_refreshed():
 
 	material.set_shader_parameter("sources", data)
 	material.set_shader_parameter("source_count", relevant_sources.size())
+
 	
 

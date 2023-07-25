@@ -8,6 +8,9 @@ shader = ExtResource("2_1hbr6")
 shader_parameter/sources = null
 shader_parameter/source_count = null
 shader_parameter/base_color = null
+shader_parameter/use_point_of_view = null
+shader_parameter/point_of_view = null
+shader_parameter/point_of_view_radius = null
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_u8ht8"]
 

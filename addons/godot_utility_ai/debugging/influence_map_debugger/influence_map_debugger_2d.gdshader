@@ -7,8 +7,14 @@ uniform float[90] sources;
 uniform int source_count;
 // the color we use for drawing influence
 uniform vec4 base_color:source_color; 
+
+uniform bool use_point_of_view;
+uniform vec2 point_of_view;
+uniform float point_of_view_radius;
+
 // stores the world position of the current "pixel"
 varying vec4 world_pos;
+
 
 float linear_contribution(float x, float rise, float offset, float exponent, float midpoint) {
 	return rise * (x - midpoint) + offset;
@@ -32,6 +38,10 @@ void fragment() {
 	if (source_count == 0) {
 		// a yellowish hue to indicate that there is no data
 		COLOR = vec4(1.,1.,0., 0.2);
+	}
+	else if (use_point_of_view && distance(world_pos.xy, point_of_view) > point_of_view_radius){
+		// outside of point of view radius, skip it
+		COLOR = vec4(0.);
 	}
 	else {
 			
@@ -81,8 +91,8 @@ void fragment() {
 			total += multiplier * clamp(contribution, 0., 1.);
 		}
 		
-		// clamp between 0 and 1.
-		total = clamp(total, 0. , 1.);
+		// constrain between 0 and 1.
+	    total /= float(source_count) * 0.5;
 		// use the base color
 		COLOR = base_color;
 		// use the total influence as alpha for the base color 
