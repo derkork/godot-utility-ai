@@ -40,5 +40,34 @@ static func retrieve_for(context:Object, key:StringName, default:Variant = null)
 		return default
 		
 	return context.get_meta(BLACKBOARD_META_KEY).get(key, default)
+
+
+static func remove(key:StringName):
+	_contents.erase(key)
+
+
+static func remove_for(context:Object, key:StringName):
+	if not is_instance_valid(context):
+		return
+		
+	if not context.has_meta(BLACKBOARD_META_KEY):
+		return
+		
+	context.get_meta(BLACKBOARD_META_KEY).erase(key)
 	
+
+	
+static func has(key:StringName) -> bool:
+	return _contents.has(key)
+	
+	
+static func has_for(context:Object, key:StringName) -> bool:
+	if not is_instance_valid(context):
+		return false
+
+	if not context.has_meta(BLACKBOARD_META_KEY):
+		return false
+		
+	return context.get_meta(BLACKBOARD_META_KEY).has(key)
+		
 	
