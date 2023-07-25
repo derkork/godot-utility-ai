@@ -1,4 +1,3 @@
-@tool
 ## A consideration that evaluates an expression. 
 class_name ExpressionConsideration
 extends Consideration

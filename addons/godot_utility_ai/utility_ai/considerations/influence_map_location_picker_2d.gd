@@ -1,4 +1,4 @@
-@tool
+
 ## A consideration that will pick a target location from an [InfluenceMap2D] and
 ## store it in the local blackboard under a given name. If no suitable spot can
 ## be found, the current position will be returned.
@@ -17,7 +17,7 @@ enum TargetExtremum {
 @export var influence_map:BaseExpression = NodeExpression.new()
 
 ## Whether the picker should pick a location with the lowest or highest influence.
-@export var extremum:TargetExtremum = TargetExtremum.HIGHEST
+@export var influence:TargetExtremum = TargetExtremum.HIGHEST
 
 ## The radius within which the picker should look for a suitable spot.
 @export var radius:BaseExpression = FloatExpression.new()
@@ -81,14 +81,23 @@ func consider(entity:Node, context:ConsiderationContext):
 		
 		
 	var point = final_position
-	if extremum == TargetExtremum.HIGHEST:
-		point = the_map.get_influence_maximum_around(final_position, radius)
+	if influence == TargetExtremum.HIGHEST:
+		point = the_map.get_influence_maximum_around(final_position, final_radius)
 	else:
-		point = the_map.get_influence_minimum_around(final_position, radius)
+		point = the_map.get_influence_minimum_around(final_position, final_radius)
 	
 	var multiplier = point.distance_to(final_position) / final_radius
 	if is_instance_valid(curve):
 		multiplier = curve.sample(multiplier)
 		
-	context.record_consideration_result(minimum_rank, multiplier)
+		
+	# TODO: this is not working when we have multiple activities. At the end
+	# we only want blackboard entries materialized when the activity is actually
+	# picked
+	
+
+	context.record_consideration_result(minimum_rank, multiplier, func(): 
+		if not blackboard_key.is_empty():
+			Blackboard.store_for(entity, blackboard_key, point)
+	)
 		
